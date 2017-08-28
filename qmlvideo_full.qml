@@ -15,6 +15,33 @@ Rectangle {
     color: "black"
     border.width: 2
 
+    property var cmd_off:          [0xFF,0x00]
+    property var cmd_right:        [0xFF,0x01];
+    property var cmd_down:         [0xFF,0x02];
+    property var cmd_play:         [0xFF,0x03];
+    property var cmd_up:           [0xFF,0x04];
+    property var cmd_left:         [0xFF,0x05];
+    property var cmd_menu:         [0xFF,0x06];
+    property var cmd_zoom_plus:    [0xFF,0x07];
+    property var cmd_zoom_min:     [0xFF,0x08];
+    property var cmd_shot:         [0xFF,0x09];
+    property var cmd_shot_ent:     [0xFF,0x0A]
+    property var cmd_on:           [0xFF,0x0B];
+    property var cmd_ok:           [0xFF,0x0C];
+    property var cmd_reload:       [0xFF,0x0E];
+    property var cmd_autofocus:    [0xFF,0x0F];
+    property var cmd_manualfocus:  [0xFF,0x10];
+    property var cmd_onepush:      [0xFF,0x11];
+
+    function serial_send(cmd ){
+        var portID=10;
+        var sbuf="";
+        for (var i=0; i < cmd.length; i++) {
+          sbuf+=(i===0?"'":",")+cmd[i].toFixed();
+        }
+        sbuf+="'";
+        mandala.current.exec_script("serial("+portID.toFixed()+","+sbuf+")");
+    }
     Item {
         id: config
         property var zoomInShortcut:    "Ctrl+Shift+W"
@@ -135,10 +162,17 @@ Rectangle {
                 id: photoWidget
                 Layout.fillWidth: true
                 Button {
+                    id:button
                     Layout.fillWidth: true
                     text: "Shot"
-                    onPressed: user5.setValue(10)
-                    onReleased: user5.setValue(0)
+                    onPressed: serial_send(cmd_shot)
+                    onReleased: serial_send(cmd_off)
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: serial_send(cmd_shot_ent)
+                        onExited:  serial_send(cmd_off);
+                    }
                 }
                 GridLayout {
                     Layout.fillWidth: true
@@ -146,21 +180,11 @@ Rectangle {
                     columns: 5
                     RoundButton {
                         text: "Play"
-                        onPressed: user5.setValue(4)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_play)
+                        onReleased: serial_send(cmd_off)
                         radius: width / 2
                         Layout.row: 0
                         Layout.column: 0
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
-                    RoundButton {
-                        text: "Init"
-                        onPressed: user5.setValue(13)
-                        onReleased: user5.setValue(0)
-                        radius: width / 2
-                        Layout.row: 0
-                        Layout.column: 2
                         Layout.minimumHeight: width
                         Layout.fillWidth: true
                     }
@@ -168,41 +192,41 @@ Rectangle {
                         text: "Up"
                         Layout.row: 1
                         Layout.column: 1
-                        onPressed: user5.setValue(5)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_up)
+                        onReleased: serial_send(cmd_off)
                     }
                     Button {
                         text: "Left"
                         Layout.row: 2
                         Layout.column: 0
-                        onPressed: user5.setValue(6)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_left)
+                        onReleased: serial_send(cmd_off)
                     }
                     Button {
                         text: "Ok"
                         Layout.row: 2
                         Layout.column: 1
-                        onPressed: user5.setValue(1)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_ok)
+                        onReleased: serial_send(cmd_off)
                     }
                     Button {
                         text: "Right"
                         Layout.row: 2
                         Layout.column: 2
-                        onPressed: user5.setValue(2)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_right)
+                        onReleased: serial_send(cmd_off)
                     }
                     Button {
                         text: "Down"
                         Layout.row: 3
                         Layout.column: 1
-                        onPressed: user5.setValue(3)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_down)
+                        onReleased: serial_send(cmd_off)
                     }
                     RoundButton {
                         text: "On"
-                        onPressed: user5.setValue(12)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_on)
+                        onReleased: serial_send(cmd_off)
                         radius: width / 2
                         Layout.row: 4
                         Layout.column: 0
@@ -211,8 +235,8 @@ Rectangle {
                     }
                     RoundButton {
                         text: "Menu"
-                        onPressed: user5.setValue(7)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_menu)
+                        onReleased: serial_send(cmd_off)
                         radius: width / 2
                         Layout.row: 4
                         Layout.column: 2
@@ -225,14 +249,14 @@ Rectangle {
                     Button {
                         text: "Zoom -"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: user5.setValue(9)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_zoom_min)
+                        onReleased: serial_send(cmd_off)
                     }
                     Button {
                         text: "Zoom +"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: user5.setValue(8)
-                        onReleased: user5.setValue(0)
+                        onPressed: serial_send(cmd_zoom_plus)
+                        onReleased: serial_send(cmd_off)
                     }
                 }
             }
