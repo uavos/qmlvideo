@@ -52,6 +52,81 @@ Rectangle {
         sequence: config.snapshotShortcut
         onActivated: player.snapshot()
     }
+    VideoOutput {
+        source: player
+        anchors {
+            left: parent.left
+            top: parent.top
+            bottom: parent.bottom
+            right: toolbar.left
+        }
+        Text {
+            anchors.centerIn: parent
+            text: player.stateText
+            visible: player.playbackState != MediaPlayer.PlayingState
+            color: "yellow"
+            font.pixelSize: parent.height / 20
+        }
+
+        Rectangle {
+            visible: player.playbackState == MediaPlayer.PlayingState
+            anchors.centerIn: parent
+            width: 1
+            height: 100
+            color: "red"
+        }
+        Rectangle {
+            visible: player.playbackState == MediaPlayer.PlayingState
+            anchors.centerIn: parent
+            width: 100
+            height: 1
+            color: "red"
+        }
+        Timer {
+            repeat: true
+            interval: 1000
+            running: true
+            onTriggered: {
+                currentTime.value = Qt.formatTime(new Date(), "hh:mm:ss")
+                currentDate.value = Qt.formatDate(new Date(), "dd-MM-yyyy")
+            }
+        }
+
+        OsdMenu {
+            id: osdMenu
+            items: [
+                OsdItem { name: roll.name; value: roll.value; precision: 4 },
+                OsdItem { name: pitch.name; value: pitch.value; precision: 4 },
+                OsdItem { name: yaw.name; value: yaw.value; precision: 4 },
+                OsdItem { name: cam_roll.name; value: cam_roll.value; precision: 4 },
+                OsdItem { name: cam_pitch.name; value: cam_pitch.value; precision: 4 },
+                OsdItem { name: cam_yaw.name; value: cam_yaw.value; precision: 4 },
+                OsdItem { name: airspeed.name; value: airspeed.value; precision: 2 },
+                OsdItem { name: "target"; value: videoCoords.targetString },
+                OsdItem { name: "distance to target"; value: videoCoords.targetDistance; precision: 4 },
+                OsdItem { id: currentDate; name: "date" },
+                OsdItem { id: currentTime; name: "time" }
+            ]
+        }
+
+        Column {
+            id: osd
+            anchors {
+                left: parent.left
+                top: parent.top
+                leftMargin: 5
+                topMargin: 5
+            }
+
+            Repeater {
+                model: osdMenu.items
+                Text {
+                    color: "red"
+                    text: modelData.name + ": " + modelData.value
+                }
+            }
+        }
+    }
     ColumnLayout {
         id: toolbar
         anchors {
@@ -294,80 +369,5 @@ Rectangle {
         reconnectTimeout: config.reconnectTimeout
         Component.onCompleted: play()
         osdMenu: osdMenu
-    }
-    VideoOutput {
-        source: player
-        anchors {
-            left: parent.left
-            top: parent.top
-            bottom: parent.bottom
-            right: toolbar.left
-        }
-        Text {
-            anchors.centerIn: parent
-            text: player.stateText
-            visible: player.playbackState != MediaPlayer.PlayingState
-            color: "yellow"
-            font.pixelSize: parent.height / 20
-        }
-
-        Rectangle {
-            visible: player.playbackState == MediaPlayer.PlayingState
-            anchors.centerIn: parent
-            width: 1
-            height: 100
-            color: "red"
-        }
-        Rectangle {
-            visible: player.playbackState == MediaPlayer.PlayingState
-            anchors.centerIn: parent
-            width: 100
-            height: 1
-            color: "red"
-        }
-        Timer {
-            repeat: true
-            interval: 1000
-            running: true
-            onTriggered: {
-                currentTime.value = Qt.formatTime(new Date(), "hh:mm:ss")
-                currentDate.value = Qt.formatDate(new Date(), "dd-MM-yyyy")
-            }
-        }
-
-        OsdMenu {
-            id: osdMenu
-            items: [
-                OsdItem { name: roll.name; value: roll.value; precision: 4 },
-                OsdItem { name: pitch.name; value: pitch.value; precision: 4 },
-                OsdItem { name: yaw.name; value: yaw.value; precision: 4 },
-                OsdItem { name: cam_roll.name; value: cam_roll.value; precision: 4 },
-                OsdItem { name: cam_pitch.name; value: cam_pitch.value; precision: 4 },
-                OsdItem { name: cam_yaw.name; value: cam_yaw.value; precision: 4 },
-                OsdItem { name: airspeed.name; value: airspeed.value; precision: 2 },
-                OsdItem { name: "target"; value: videoCoords.targetString },
-                OsdItem { name: "distance to target"; value: videoCoords.targetDistance; precision: 4 },
-                OsdItem { id: currentDate; name: "date" },
-                OsdItem { id: currentTime; name: "time" }
-            ]
-        }
-
-        Column {
-            id: osd
-            anchors {
-                left: parent.left
-                top: parent.top
-                leftMargin: 5
-                topMargin: 5
-            }
-
-            Repeater {
-                model: osdMenu.items
-                Text {
-                    color: "red"
-                    text: modelData.name + ": " + modelData.value
-                }
-            }
-        }
     }
 }    
