@@ -22,8 +22,6 @@ public:
     Q_PROPERTY(int reconnectTimeout READ getReconnectTimeout WRITE setReconnectTimeout)
     Q_PROPERTY(QString recdir READ getRecdir WRITE setRecdir)
     Q_PROPERTY(QString photodir READ getPhotoDir WRITE setPhotoDir)
-    Q_PROPERTY(bool lowDelay READ getLowDelay WRITE setLowDelay)
-    Q_PROPERTY(bool noBuffer READ getNoBuffer WRITE setNoBuffer)
 
     static void registerQmlType();
 
@@ -65,12 +63,6 @@ public:
     OsdMenu *osdMenu() const;
     void setOsdMenu(OsdMenu *osdMenu);
 
-    bool getLowDelay() const;
-    void setLowDelay(bool lowDelay);
-
-    bool getNoBuffer() const;
-    void setNoBuffer(bool noBuffer);
-
 private slots:
     void onFrameReceived(QImage frame);
     void onStateChanged(QAbstractSocket::SocketState socketState);
@@ -95,8 +87,6 @@ private:
     QImage m_frame;
     QTimer m_reconnectTimer;
     QString m_flags;
-    bool m_lowDelay;
-    bool m_noBuffer;
 
 signals:
     void playbackStateChanged();

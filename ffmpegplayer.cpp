@@ -19,9 +19,7 @@ FfmpegPlayer::FfmpegPlayer(QObject *parent):
     m_error(QMediaPlayer::NoError),
     m_reconnectTimeout(5000),
     m_stateText("Unconnected"),
-    m_photoDir(QDir::homePath()),
-    m_lowDelay(false),
-    m_noBuffer(false)
+    m_photoDir(QDir::homePath())
 {
     qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
     connect(&m_videoThread, SIGNAL(errorOccured(QString)), this, SLOT(onErrorOccurred(QString)));
@@ -35,7 +33,8 @@ FfmpegPlayer::FfmpegPlayer(QObject *parent):
 void FfmpegPlayer::play()
 {
     m_videoThread.stop();
-    if(!m_videoThread.wait(300))
+    m_videoThread.wait();
+    if(!m_videoThread.wait(1000))
         m_videoThread.terminate();
     m_error = QMediaPlayer::NoError;
     m_errorString.clear();
@@ -47,7 +46,8 @@ void FfmpegPlayer::play()
 void FfmpegPlayer::stop()
 {
     m_videoThread.stop();
-    if(!m_videoThread.wait(300))
+    m_videoThread.wait();
+    if(!m_videoThread.wait(1000))
         m_videoThread.terminate();
     m_surface->stop();
 }
@@ -141,28 +141,6 @@ void FfmpegPlayer::setErrorString(const QString &errorString)
 void FfmpegPlayer::onReconnectTimerTimeout()
 {
     play();
-}
-
-bool FfmpegPlayer::getNoBuffer() const
-{
-    return m_noBuffer;
-}
-
-void FfmpegPlayer::setNoBuffer(bool noBuffer)
-{
-    m_noBuffer = noBuffer;
-    m_videoThread.setNoBuffer(noBuffer);
-}
-
-bool FfmpegPlayer::getLowDelay() const
-{
-    return m_lowDelay;
-}
-
-void FfmpegPlayer::setLowDelay(bool lowDelay)
-{
-    m_lowDelay = lowDelay;
-    m_videoThread.setLowDelay(lowDelay);
 }
 
 OsdMenu *FfmpegPlayer::osdMenu() const
