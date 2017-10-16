@@ -9,57 +9,60 @@ import VideoController 10.0
 import VideoCoords 11.0
 import OsdItem 10.0
 import OsdMenu 10.0
+import CameraControl 1.0
 
 Rectangle {
     id: root
     color: "black"
     border.width: 2
+    property var cmd_off:          0x00
+    property var cmd_right:        0x01
+    property var cmd_down:         0x02
+    property var cmd_play:         0x03
+    property var cmd_up:           0x04
+    property var cmd_left:         0x05
+    property var cmd_menu:         0x06
+    property var cmd_zoom_plus:    0x07
+    property var cmd_zoom_min:     0x08
+    property var cmd_shot:         0x09
+    property var cmd_shot_ent:     0x0a
+    property var cmd_on:           0x0b
+    property var cmd_ok:           0x0c
 
-    property var cmd_off:          [0xFF,0x00]
-    property var cmd_right:        [0xFF,0x01];
-    property var cmd_down:         [0xFF,0x02];
-    property var cmd_play:         [0xFF,0x03];
-    property var cmd_up:           [0xFF,0x04];
-    property var cmd_left:         [0xFF,0x05];
-    property var cmd_menu:         [0xFF,0x06];
-    property var cmd_zoom_plus:    [0xFF,0x07];
-    property var cmd_zoom_min:     [0xFF,0x08];
-    property var cmd_shot:         [0xFF,0x09];
-    property var cmd_shot_ent:     [0xFF,0x0A]
-    property var cmd_on:           [0xFF,0x0B];
-    property var cmd_ok:           [0xFF,0x0C];
-    property var cmd_reload:       [0xFF,0x0E];
-    property var cmd_autofocus:    [0xFF,0x0F];
-    property var cmd_manualfocus:  [0xFF,0x10];
-    property var cmd_onepush:      [0xFF,0x11];
 
-    function serial_send(cmd ){
-        var portID=10;
-        var sbuf="";
-        for (var i=0; i < cmd.length; i++) {
-          sbuf+=(i===0?"'":",")+cmd[i].toFixed();
-        }
-        sbuf+="'";
-        mandala.current.exec_script("serial("+portID.toFixed()+","+sbuf+")");
-    }
+
+    property var cmd_reload:       0x0E
+    property var cmd_autofocus:    0x0F
+    property var cmd_manualfocus:  0x10
+    property var cmd_onepush:      0x11
+
+    property bool btn_area: false;
+
     Item {
         id: config
-        property var zoomInShortcut:    "Ctrl+Shift+W"
-        property var zoomOutShortcut:   "Ctrl+Shift+E"
-        property var snapshotShortcut:  "Ctrl+Shift+R"
-        property var recdir:            "/somedir"
-        property var photodir:          "/somedir"
+        property var zoomInShortcut:    "Shift+W"
+        property var zoomOutShortcut:   "Shift+E"
+        property var snapshotShortcut:  "Shift+R"
+        property var recdir:            "/home/gcu/BLA_Video/"
+        property var photodir:          "/home/gcu/BLA_Foto/"
         property var reconnectTimeout:  20000
         property var cameras: [
             "rtsp://admin:12345@192.168.0.252:554/PSIA/streaming/channels/101",
             "rtsp://192.168.0.50:554/cam0_0",
-            "/dev/video0"
+            "rtsp://192.168.0.168/0"
         ]
         property var camerasAlias: [
-            "Camera 1",
-            "Camera 2",
-            "Camera 3"
+            "ГОС-101 Т",
+            "ГОС-101 Д",
+            "ГОС-101 Ф"
         ]
+    }
+    Timer{
+        interval:500; running: true; repeat: true
+        onTriggered: if(user6.value){
+                         player.snapshot();
+                         user6.setValue(0);
+                     }
     }
 
     Shortcut {
@@ -140,123 +143,35 @@ Rectangle {
             }
         }
 
-        TabBar {
-            id: profileBar
-            TabButton {
-                text: "Photo"
-            }
-            TabButton {
-                text: "Video"
-            }
-            Layout.fillWidth: true
-        }
-
         Rectangle {
             Layout.minimumHeight: parent.height / 100 * 10
         }
         StackLayout
         {
             Layout.fillWidth: true
-            currentIndex: profileBar.currentIndex
-            ColumnLayout {
-                id: photoWidget
-                Layout.fillWidth: true
-                Button {
-                    id:button
-                    Layout.fillWidth: true
-                    text: "Shot"
-                    onPressed: serial_send(cmd_shot)
-                    onReleased: serial_send(cmd_off)
-                    MouseArea{
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: serial_send(cmd_shot_ent)
-                        onExited:  serial_send(cmd_off);
-                    }
-                }
-                GridLayout {
-                    Layout.fillWidth: true
-                    rows: 5
-                    columns: 5
-                    RoundButton {
-                        text: "Play"
-                        onPressed: serial_send(cmd_play)
-                        onReleased: serial_send(cmd_off)
-                        radius: width / 2
-                        Layout.row: 0
-                        Layout.column: 0
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
-                    Button {
-                        text: "Up"
-                        Layout.row: 1
-                        Layout.column: 1
-                        onPressed: serial_send(cmd_up)
-                        onReleased: serial_send(cmd_off)
-                    }
-                    Button {
-                        text: "Left"
-                        Layout.row: 2
-                        Layout.column: 0
-                        onPressed: serial_send(cmd_left)
-                        onReleased: serial_send(cmd_off)
-                    }
-                    Button {
-                        text: "Ok"
-                        Layout.row: 2
-                        Layout.column: 1
-                        onPressed: serial_send(cmd_ok)
-                        onReleased: serial_send(cmd_off)
-                    }
-                    Button {
-                        text: "Right"
-                        Layout.row: 2
-                        Layout.column: 2
-                        onPressed: serial_send(cmd_right)
-                        onReleased: serial_send(cmd_off)
-                    }
-                    Button {
-                        text: "Down"
-                        Layout.row: 3
-                        Layout.column: 1
-                        onPressed: serial_send(cmd_down)
-                        onReleased: serial_send(cmd_off)
-                    }
-                    RoundButton {
-                        text: "On"
-                        onPressed: serial_send(cmd_on)
-                        onReleased: serial_send(cmd_off)
-                        radius: width / 2
-                        Layout.row: 4
-                        Layout.column: 0
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
-                    RoundButton {
-                        text: "Menu"
-                        onPressed: serial_send(cmd_menu)
-                        onReleased: serial_send(cmd_off)
-                        radius: width / 2
-                        Layout.row: 4
-                        Layout.column: 2
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
+            currentIndex:urlInput.currentIndex
+            ColumnLayout{
+                FotoButtons{
+                    id:fotobuttons
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Button {
-                        text: "Zoom -"
+                        text: "ZOOM+"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: serial_send(cmd_zoom_min)
-                        onReleased: serial_send(cmd_off)
+                        onPressed:{
+                              cameraControl.send_cmd(cmd_zoom_min)
+                        }
+                        onReleased: cameraControl.send_cmd(cmd_off)
                     }
                     Button {
-                        text: "Zoom +"
+                        text: "ZOOM-"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: serial_send(cmd_zoom_plus)
-                        onReleased: serial_send(cmd_off)
+                        onPressed:{
+                                 cameraControl.send_cmd(cmd_zoom_plus)
+                        }
+
+                        onReleased: cameraControl.send_cmd(cmd_off)
                     }
                 }
             }
@@ -290,6 +205,32 @@ Rectangle {
                     }
                 }
             }
+            ColumnLayout{
+                FotoButtons{
+                    id:fotobuttons_new
+
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Button {
+                        text: "<---"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                              cameraControl.send_cmd(cmd_zoom_min)
+                        }
+                    }
+                    Button {
+                        text: "--->"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                                 cameraControl.send_cmd(cmd_zoom_plus)
+                        }
+                    }
+                }
+            }
+
         }
     }
     Button {
@@ -300,6 +241,10 @@ Rectangle {
         flat: true
         text: toolbar.state == "visible" ? ">" : "<"
         onClicked: toolbar.state == "visible" ? toolbar.state = "hidden" : toolbar.state = "visible"
+    }
+
+    CameraControl{
+        id: cameraController
     }
 
     VideoCoords {
@@ -394,4 +339,4 @@ Rectangle {
             }
         }
     }
-}    
+}

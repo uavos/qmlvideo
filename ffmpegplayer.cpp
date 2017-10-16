@@ -30,6 +30,9 @@ FfmpegPlayer::FfmpegPlayer(QObject *parent):
             this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
 
     connect(&m_reconnectTimer, SIGNAL(timeout()), this, SLOT(onReconnectTimerTimeout()));
+
+
+
 }
 
 void FfmpegPlayer::play()

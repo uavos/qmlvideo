@@ -28,7 +28,8 @@ SOURCES += \
     ffmpegvideowriter.cpp \
     ffmpegvideoreader.cpp \
     osdmenu.cpp \
-    smartffmpeg.cpp
+    smartffmpeg.cpp \
+    cameracontrol.cpp
 
 INCLUDEPATH += /usr/share/uavos/gcu/sdk/inc/
 
@@ -65,8 +66,10 @@ HEADERS  += \
     ffmpegvideowriter.h \
     ffmpegvideoreader.h \
     osdmenu.h \
-    smartffmpeg.h
+    smartffmpeg.h \
+    cameracontrol.h
 
 DISTFILES += \
     qmlvideo_lite.qml \
-    qmlvideo_full.qml
+    qmlvideo_full.qml \
+    FotoButtons.qml
