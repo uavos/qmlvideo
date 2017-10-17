@@ -47,14 +47,14 @@ Rectangle {
         property var photodir:          "/home/gcu/BLA_Foto/"
         property var reconnectTimeout:  20000
         property var cameras: [
+            "rtsp://192.168.0.168/0",
             "rtsp://admin:12345@192.168.0.252:554/PSIA/streaming/channels/101",
             "rtsp://192.168.0.50:554/cam0_0",
-            "rtsp://192.168.0.168/0"
         ]
         property var camerasAlias: [
+            "ГОС-101 Ф",
             "ГОС-101 Т",
             "ГОС-101 Д",
-            "ГОС-101 Ф"
         ]
     }
     Timer{
@@ -82,6 +82,7 @@ Rectangle {
         sequence: config.snapshotShortcut
         onActivated: player.snapshot()
     }
+
     ColumnLayout {
         id: toolbar
         anchors {
@@ -151,29 +152,153 @@ Rectangle {
             Layout.fillWidth: true
             currentIndex:urlInput.currentIndex
             ColumnLayout{
-                FotoButtons{
-                    id:fotobuttons
+                ColumnLayout {
+                    id: photoWidget
+                    Layout.fillWidth: true
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Record"
+                        checkable: true
+                        onClicked: player.enableRecord(checked)
+                    }
+                    Button {
+                        id:but
+                        Layout.fillWidth: true
+                        text: "Shot"
+                        onClicked: player.snapshot()
+                        onPressed: cameraControl.send_cmd(cmd_shot)
+                        onReleased: cameraControl.send_cmd(cmd_off)
+                        onHoveredChanged: if(btn_area){
+                                              btn_area=false;
+                                          }else
+                                          {  btn_area=true;
+                                              cameraControl.send_cmd(cmd_shot_ent)
+                                          }
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        rows: 5
+                        columns: 5
+                        RoundButton {
+                            text: "Play"
+                            onPressed:cameraControl.send_cmd(cmd_play)
+                            onReleased:cameraControl.send_cmd(cmd_off)
+                            radius: width / 2
+                            Layout.row: 0
+                            Layout.column: 0
+                            Layout.minimumHeight: width
+                            Layout.fillWidth: true
+                        }
+                        Button {
+                            text: "Up"
+                            Layout.row: 1
+                            Layout.column: 1
+                            onPressed: cameraControl.send_cmd(cmd_up)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Left"
+                            Layout.row: 2
+                            Layout.column: 0
+                            onPressed: cameraControl.send_cmd(cmd_left)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Ok"
+                            Layout.row: 2
+                            Layout.column: 1
+                            onPressed: cameraControl.send_cmd(cmd_ok)
+                            onReleased:cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Right"
+                            Layout.row: 2
+                            Layout.column: 2
+                            onPressed: cameraControl.send_cmd(cmd_right)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Down"
+                            Layout.row: 3
+                            Layout.column: 1
+                            onPressed: cameraControl.send_cmd(cmd_down)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        RoundButton {
+                            text: "On"
+                            onPressed:cameraControl.send_cmd(cmd_on)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                            radius: width / 2
+                            Layout.row: 4
+                            Layout.column: 0
+                            Layout.minimumHeight: width
+                            Layout.fillWidth: true
+                        }
+                        RoundButton {
+                            text: "Menu"
+                            onPressed: cameraControl.send_cmd(cmd_menu)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                            radius: width / 2
+                            Layout.row: 4
+                            Layout.column: 2
+                            Layout.minimumHeight: width
+                            Layout.fillWidth: true
+                        }
+                    }
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Button {
-                        text: "ZOOM+"
+                        text: "<---"
                         Layout.preferredWidth: toolbar.width / 2
                         onPressed:{
+                            for(var i=0;i<4;i++)
                               cameraControl.send_cmd(cmd_zoom_min)
                         }
-                        onReleased: cameraControl.send_cmd(cmd_off)
                     }
+                    Button {
+                        text: "--->"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                                 cameraControl.send_cmd(cmd_zoom_plus)
+                        }
+                    }
+                }
+                RowLayout {
+                    Layout.fillWidth: true
                     Button {
                         text: "ZOOM-"
                         Layout.preferredWidth: toolbar.width / 2
                         onPressed:{
-                                 cameraControl.send_cmd(cmd_zoom_plus)
+                            cameraControl.send_cmd(cmd_zoom_min)
                         }
-
+                                       onReleased: cameraControl.send_cmd(cmd_off)
+                    }
+                    Button {
+                        text: "ZOOM+"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed:{
+                            cameraControl.send_cmd(cmd_zoom_plus)
+                        }
                         onReleased: cameraControl.send_cmd(cmd_off)
                     }
                 }
+            }
+            ColumnLayout{
+                id:tcamera
+                Button {
+                    Layout.fillWidth: true
+                    text: "Record"
+                    checkable: true
+                    onClicked: player.enableRecord(checked)
+                }
+                Button {
+                    Layout.fillWidth: true
+                    text: "Snapshot"
+                    onClicked: player.snapshot()
+                }
+
             }
             ColumnLayout {
                 id: videoWidget
@@ -205,31 +330,7 @@ Rectangle {
                     }
                 }
             }
-            ColumnLayout{
-                FotoButtons{
-                    id:fotobuttons_new
 
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "<---"
-                        Layout.preferredWidth: toolbar.width / 2
-                        onPressed:{
-                            for(var i=0;i<4;i++)
-                              cameraControl.send_cmd(cmd_zoom_min)
-                        }
-                    }
-                    Button {
-                        text: "--->"
-                        Layout.preferredWidth: toolbar.width / 2
-                        onPressed:{
-                            for(var i=0;i<4;i++)
-                                 cameraControl.send_cmd(cmd_zoom_plus)
-                        }
-                    }
-                }
-            }
 
         }
     }
@@ -244,7 +345,7 @@ Rectangle {
     }
 
     CameraControl{
-        id: cameraController
+        id: cameraControl
     }
 
     VideoCoords {
