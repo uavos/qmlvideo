@@ -16,7 +16,7 @@ OBJECTS_DIR = obj
 UI_DIR = obj
 MOC_DIR = obj
 target.path = ~/.gcu/plugins
-qml.files = qmlvideo_full.qml
+qml.files = qmlvideo_full.qml PhotoButtons.qml
 qml.path = ~/.gcu/plugins
 
 SOURCES += \
@@ -72,4 +72,4 @@ HEADERS  += \
 DISTFILES += \
     qmlvideo_lite.qml \
     qmlvideo_full.qml \
-    FotoButtons.qml
+    PhotoButtons.qml
