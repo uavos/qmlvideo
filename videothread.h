@@ -27,17 +27,12 @@ public:
 
     void setOsdMenu(OsdMenu *osdMenu);
 
-    void setNoBuffer(bool noBuffer);
-    void setLowDelay(bool lowDelay);
-
 protected:
     void run();
 
 private:
     std::atomic_bool m_stop;
     std::atomic_bool m_enableWriter;
-    std::atomic_bool m_noBuffer;
-    std::atomic_bool m_lowDelay;
     QString m_inputUrl;
     QString m_recdir;
     QMutex m_ioMutex;

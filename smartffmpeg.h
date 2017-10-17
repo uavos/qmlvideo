@@ -14,11 +14,13 @@ extern "C"
 #include <libavcodec/avcodec.h>
 }
 
+void codecContextDeleter(AVCodecContext *codecContext);
 void frameDeleter(AVFrame *frame);
 void swsContextDeleter(SwsContext *context);
 void formatContextDeleter(AVFormatContext *context);
 void packetDeleter(AVPacket *packet);
 
+using SmartCodecContext = std::shared_ptr<AVCodecContext>;
 using SmartFrame = std::shared_ptr<AVFrame>;
 using SmartSwsContext = std::shared_ptr<SwsContext>;
 using SmartFormatContext = std::shared_ptr<AVFormatContext>;

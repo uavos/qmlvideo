@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+void codecContextDeleter(AVCodecContext *codecContext)
+{
+}
+
 void frameDeleter(AVFrame *frame)
 {
     av_frame_free(&frame);
@@ -14,14 +18,11 @@ void swsContextDeleter(SwsContext *context)
 
 void formatContextDeleter(AVFormatContext *context)
 {
-    AVStream *stream = (AVStream*)context->opaque;
-    if(stream && stream->codec)
-        avcodec_close(stream->codec);
     avformat_close_input(&context);
 }
 
 void packetDeleter(AVPacket *packet)
 {
-    av_free_packet(packet);
+    av_packet_unref(packet);
     delete packet;
 }

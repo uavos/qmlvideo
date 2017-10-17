@@ -4,7 +4,8 @@
 
 #define CRITICAL_ERROR(x) \
 { \
-    std::cout << x << std::endl; \
+    std::lock_guard<std::mutex> locker(m_ioMutex); \
+    m_errorString = x; \
     av_dict_free(&opts); \
     return false; \
     }
@@ -18,44 +19,35 @@ static int interruptCallback(void *opaque)
 FfmpegVideoReader::FfmpegVideoReader():
     m_isOpen(false),
     m_stop(0),
-    m_noBuffer(false),
-    m_lowDelay(false),
     m_videoStreamIdx(-1)
 {
     av_register_all();
     avformat_network_init();
     avdevice_register_all();
+    av_log_set_level(AV_LOG_QUIET);
 }
 
-void FfmpegVideoReader::setInterruptFlag(std::atomic_bool *stop)
+FfmpegVideoReader::~FfmpegVideoReader()
 {
-    m_stop = stop;
+    close();
 }
 
 bool FfmpegVideoReader::open(const std::string &path)
 {
+    m_stop = false;
     m_path = path;
-
     m_videoStreamIdx = -1;
 
     AVDictionary *opts = NULL;
 
-    if(m_lowDelay)
-    {
-        av_dict_set(&opts, "flags", "low_delay", 0);
-        std::cout << "Low delay flag detected" << std::endl;
-    }
-    if(m_noBuffer)
-    {
-        av_dict_set(&opts, "fflags", "nobuffer", 0);
-        std::cout << "No buffer flag detected" << std::endl;
-    }
+    av_dict_set(&opts, "flags", "low_delay", 0);
+    av_dict_set(&opts, "fflags", "nobuffer", 0);
 
     AVFormatContext *formatContext = avformat_alloc_context();
 
     /* callback */
     formatContext->interrupt_callback.callback = &interruptCallback;
-    formatContext->interrupt_callback.opaque = m_stop;
+    formatContext->interrupt_callback.opaque = &m_stop;
 
     /* open input file, and allocate format context */
     if(avformat_open_input(&formatContext, m_path.c_str(), NULL, &opts) < 0)
@@ -72,50 +64,43 @@ bool FfmpegVideoReader::open(const std::string &path)
     if(m_videoStreamIdx < 0)
         CRITICAL_ERROR("Could not find video stream in input file");
 
-    AVStream *videoStream = m_formatContext->streams[m_videoStreamIdx];
-    if(!videoStream)
+    AVStream *stream = m_formatContext->streams[m_videoStreamIdx];
+    if(!stream)
         CRITICAL_ERROR("Could not find audio or video stream in the input, aborting");
-    m_formatContext->opaque = videoStream;
 
     /* find decoder for the stream */
-    AVCodecContext *codecContext = videoStream->codec;
-    AVCodec *codec = avcodec_find_decoder(codecContext->codec_id);
+    m_codecContext = SmartCodecContext(stream->codec, codecContextDeleter);
+    AVCodec *codec = avcodec_find_decoder(m_codecContext->codec_id);
     if(!codec)
         CRITICAL_ERROR("Failed to find codec");
 
     /* Init the decoders, with or without reference counting */
     av_dict_set(&opts, "refcounted_frames", "0", 0);
-    if(avcodec_open2(codecContext, codec, &opts) < 0)
+    if(avcodec_open2(m_codecContext.get(), codec, &opts) < 0)
         CRITICAL_ERROR("Failed to open codec");
 
     m_isOpen = true;
     av_dict_free(&opts);
+
+    m_readingThread = std::thread([this] {
+        this->readingThreadImpl();
+    });
+    m_decodingThread = std::thread([this] {
+        this->decodingThreadImpl();
+    });
+
     return true;
 }
 
-bool FfmpegVideoReader::read(SmartFrame frame)
+SmartFrame FfmpegVideoReader::getFrame()
 {
-    SmartPacket packet(new AVPacket(), packetDeleter);
-    /* read frames from the file */
-    if(av_read_frame(m_formatContext.get(), packet.get()) < 0)
-        return false;
-    int got_frame = 0;
-    AVStream *videoStream = m_formatContext->streams[m_videoStreamIdx];
-    AVCodecContext *codecContext = videoStream->codec;
-    if(packet->stream_index == m_videoStreamIdx)
-    {
-        /* decode video frame */
-        int ret = avcodec_decode_video2(codecContext, frame.get(), &got_frame, packet.get());
-        if(ret < 0)
-        {
-            std::cout << "Warning: Error when decoding video frame" << std::endl;
-            return false;
-        }
-    }
-    return got_frame > 0;
+    std::lock_guard<std::mutex> locker(m_ioMutex);
+    SmartFrame frame =  m_frame;
+    m_frame = 0;
+    return frame;
 }
 
-bool FfmpegVideoReader::isRealtime()
+bool FfmpegVideoReader::isRealtime() const
 {
     std::string formatName = std::string(m_formatContext->iformat->name);
     return formatName == "rtsp" ||
@@ -129,6 +114,12 @@ bool FfmpegVideoReader::isRealtime()
 void FfmpegVideoReader::close()
 {
     m_isOpen = false;
+    m_stop = true;
+    m_queueNotify.notify_all();
+    if(m_readingThread.joinable())
+        m_readingThread.join();
+    if(m_decodingThread.joinable())
+        m_decodingThread.join();
 }
 
 bool FfmpegVideoReader::isOpen() const
@@ -136,41 +127,85 @@ bool FfmpegVideoReader::isOpen() const
     return m_isOpen;
 }
 
-double FfmpegVideoReader::getFps()
+double FfmpegVideoReader::getFps() const
 {
     AVStream *videoStream = m_formatContext->streams[m_videoStreamIdx];
     const double eps_zero = 0.000025;
-    double fps = r2d(videoStream->r_frame_rate);
+    double fps = av_q2d(videoStream->r_frame_rate);
 
     if(fps < eps_zero)
     {
-        fps = r2d(videoStream->avg_frame_rate);
+        fps = av_q2d(videoStream->avg_frame_rate);
         std::cerr << "r_frame_rate is wrong, use avg_frame_rate, fps: " << fps << std::endl;
     }
 
     if(fps < eps_zero)
     {
-        fps = 1.0 / r2d(videoStream->codec->time_base);
+        fps = 1.0 / av_q2d(m_codecContext->time_base);
         std::cerr << "avg_frame_rate is wrong, use codec time_base, fps: " << fps << std::endl;
     }
 
     return fps;
 }
 
-void FfmpegVideoReader::setNoBuffer(bool noBuffer)
+std::string FfmpegVideoReader::getErrorString() const
 {
-    m_noBuffer = noBuffer;
+    std::lock_guard<std::mutex> locker(m_ioMutex);
+    return m_errorString;
 }
 
-void FfmpegVideoReader::setLowDelay(bool lowDelay)
+void FfmpegVideoReader::readingThreadImpl()
 {
-    m_lowDelay = lowDelay;
+    int interval = 1000.0 / getFps();
+    bool realtime = isRealtime();
+    while(!m_stop)
+    {
+        auto tp1 = hclock::now();
+        SmartPacket packet(new AVPacket(), packetDeleter);
+        if(av_read_frame(m_formatContext.get(), packet.get()) >= 0)
+        {
+            auto tp2 = hclock::now();
+            if(packet->stream_index == m_videoStreamIdx)
+            {
+                m_queueMutex.lock();
+                m_queue.push(packet);
+                m_queueMutex.unlock();
+                m_queueNotify.notify_all();
+                if(!realtime)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(interval - duration(tp1, tp2)));
+            }
+        }
+        else
+            m_isOpen = false;
+    }
 }
 
-double FfmpegVideoReader::r2d(AVRational r)
+void FfmpegVideoReader::decodingThreadImpl()
 {
-    if(r.num == 0 || r.den == 0)
-        return 0;
-    else
-        return (double)r.num / (double)r.den;
+    std::unique_lock<std::mutex> lock(m_queueMutex);
+    while(!m_stop)
+    {
+        m_queueNotify.wait(lock);
+        while(m_queue.size() > 0)
+        {
+            SmartPacket packet = m_queue.front();
+            SmartFrame frame(av_frame_alloc(), frameDeleter);
+            m_queue.pop();
+            int got_frame = 0;
+            if(avcodec_decode_video2(m_codecContext.get(), frame.get(), &got_frame, packet.get()) < 0)
+            {
+                std::cout << "Warning: Error when decoding video frame" << std::endl;
+            }
+            else if(got_frame == 1)
+            {
+                std::lock_guard<std::mutex> locker(m_ioMutex);
+                m_frame = frame;
+            }
+        }
+    }
+}
+
+int FfmpegVideoReader::duration(const hclock::time_point &tp1, const hclock::time_point &tp2)
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(tp2 - tp1).count();
 }

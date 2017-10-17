@@ -365,6 +365,7 @@ Rectangle {
         Component.onCompleted: play()
         osdMenu: osdMenu
     }
+
     VideoOutput {
         source: player
         anchors {
@@ -441,3 +442,4 @@ Rectangle {
         }
     }
 }
+
