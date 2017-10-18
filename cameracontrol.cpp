@@ -1,5 +1,8 @@
 #include "cameracontrol.h"
 
+#include <QMandala.h>
+#include <QtQml/QtQml>
+
 CameraControl::CameraControl(QObject *parent):
     QObject(parent),
     m_portId(10),

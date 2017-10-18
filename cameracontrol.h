@@ -2,8 +2,6 @@
 #define CAMERACONTROL_H
 
 #include <QObject>
-#include <QMandala.h>
-#include <QtQml/qqml.h>
 
 class CameraControl: public QObject
 {
@@ -20,7 +18,7 @@ public:
         CMD_UP              = 0x04,
         CMD_LEFT            = 0x05,
         CMD_MENU            = 0x06,
-        CMD_ZOOM_IN       = 0x07,
+        CMD_ZOOM_IN         = 0x07,
         CMD_ZOOM_OUT        = 0x08,
         CMD_SHOT            = 0x09,
         CMD_SHOT_ENT        = 0x0A,
@@ -51,7 +49,7 @@ public:
     void setBehaviour(int behaviour);
 
 private:
-    int m_portId = 10;
+    int m_portId;
     int m_behaviour;
 };
 
