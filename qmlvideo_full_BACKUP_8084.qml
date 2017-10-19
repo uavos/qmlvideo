@@ -130,8 +130,9 @@ Rectangle {
             Layout.fillWidth: true
             currentIndex: urlInput.currentIndex
             ColumnLayout{
-                PhotoButtons{
-                    id: photobuttons
+<<<<<<< HEAD
+                ColumnLayout {
+                    id: photoWidget
                     Layout.fillWidth: true
                     Button {
                         Layout.fillWidth: true
@@ -223,18 +224,30 @@ Rectangle {
                             Layout.fillWidth: true
                         }
                     }
+=======
+                PhotoButtons{
+                    id: photobuttons
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Button {
                         text: "<---"
                         Layout.preferredWidth: toolbar.width / 2
+<<<<<<< HEAD
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                              cameraControl.send_cmd(cmd_zoom_min)
+                        }
+=======
                         onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
                         onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
                     }
                     Button {
                         text: "--->"
                         Layout.preferredWidth: toolbar.width / 2
+<<<<<<< HEAD
                         onPressed:{
                             for(var i=0;i<4;i++)
                                  cameraControl.send_cmd(cmd_zoom_plus)
@@ -246,8 +259,8 @@ Rectangle {
                     Button {
                         text: "ZOOM-"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+                        onPressed:{
+                            cameraControl.send_cmd(cmd_zoom_min)
                         }
                                        onReleased: cameraControl.send_cmd(cmd_off)
                     }
@@ -258,6 +271,10 @@ Rectangle {
                             cameraControl.send_cmd(cmd_zoom_plus)
                         }
                         onReleased: cameraControl.send_cmd(cmd_off)
+=======
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
                     }
                 }
             }
@@ -306,6 +323,9 @@ Rectangle {
                     }
                 }
             }
+<<<<<<< HEAD
+
+=======
             ColumnLayout{
                 PhotoButtons{
                     id: photobuttons_new
@@ -316,7 +336,15 @@ Rectangle {
                         text: "<---"
                         Layout.preferredWidth: toolbar.width / 2
                         onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
+                    }
+                    Button {
+                        text: "--->"
+                        Layout.preferredWidth: toolbar.width / 2
                         onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+                    }
+                }
+            }
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
 
         }
     }
@@ -332,9 +360,12 @@ Rectangle {
 
     CameraControl{
         id: cameraControl
+<<<<<<< HEAD
+=======
         portId: 10
         behaviour: urlInput.currentIndex == 3 ?
                        CameraControl.BEHAVIOUR_NEW : CameraControl.BEHAVIOUR_OLD
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
     }
 
     VideoCoords {

@@ -15,6 +15,28 @@ Rectangle {
     id: root
     color: "black"
     border.width: 2
+    property var cmd_off:          0x00
+    property var cmd_right:        0x01
+    property var cmd_down:         0x02
+    property var cmd_play:         0x03
+    property var cmd_up:           0x04
+    property var cmd_left:         0x05
+    property var cmd_menu:         0x06
+    property var cmd_zoom_plus:    0x07
+    property var cmd_zoom_min:     0x08
+    property var cmd_shot:         0x09
+    property var cmd_shot_ent:     0x0a
+    property var cmd_on:           0x0b
+    property var cmd_ok:           0x0c
+
+
+
+    property var cmd_reload:       0x0E
+    property var cmd_autofocus:    0x0F
+    property var cmd_manualfocus:  0x10
+    property var cmd_onepush:      0x11
+
+    property bool btn_area: false;
 
     Item {
         id: config
@@ -128,10 +150,10 @@ Rectangle {
         StackLayout
         {
             Layout.fillWidth: true
-            currentIndex: urlInput.currentIndex
+            currentIndex:urlInput.currentIndex
             ColumnLayout{
-                PhotoButtons{
-                    id: photobuttons
+                ColumnLayout {
+                    id: photoWidget
                     Layout.fillWidth: true
                     Button {
                         Layout.fillWidth: true
@@ -229,8 +251,10 @@ Rectangle {
                     Button {
                         text: "<---"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                              cameraControl.send_cmd(cmd_zoom_min)
+                        }
                     }
                     Button {
                         text: "--->"
@@ -246,8 +270,8 @@ Rectangle {
                     Button {
                         text: "ZOOM-"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+                        onPressed:{
+                            cameraControl.send_cmd(cmd_zoom_min)
                         }
                                        onReleased: cameraControl.send_cmd(cmd_off)
                     }
@@ -306,17 +330,7 @@ Rectangle {
                     }
                 }
             }
-            ColumnLayout{
-                PhotoButtons{
-                    id: photobuttons_new
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "<---"
-                        Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+
 
         }
     }
@@ -332,9 +346,6 @@ Rectangle {
 
     CameraControl{
         id: cameraControl
-        portId: 10
-        behaviour: urlInput.currentIndex == 3 ?
-                       CameraControl.BEHAVIOUR_NEW : CameraControl.BEHAVIOUR_OLD
     }
 
     VideoCoords {
