@@ -5,6 +5,7 @@
 #include "videocontroller.h"
 #include "videocoords.h"
 #include "osdmenu.h"
+#include "cameracontrol.h"
 
 void QmlVideoPlugin::init(void)
 {
@@ -18,6 +19,7 @@ void QmlVideoPlugin::init(void)
     VideoCoords::registerQmlType();
     OsdItem::registerQmlType();
     OsdMenu::registerQmlType();
+    CameraControl::registerQmlType();
 }
 
 QmlVideoPlugin::QmlVideoPlugin()

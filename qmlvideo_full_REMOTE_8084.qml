@@ -25,14 +25,14 @@ Rectangle {
         property var photodir:          "/home/gcu/BLA_Foto/"
         property var reconnectTimeout:  20000
         property var cameras: [
-            "rtsp://192.168.0.168/0",
             "rtsp://admin:12345@192.168.0.252:554/PSIA/streaming/channels/101",
             "rtsp://192.168.0.50:554/cam0_0",
+            "rtsp://192.168.0.168/0"
         ]
         property var camerasAlias: [
-            "ГОС-101 Ф",
             "ГОС-101 Т",
             "ГОС-101 Д",
+            "ГОС-101 Ф"
         ]
     }
     Timer{
@@ -60,7 +60,6 @@ Rectangle {
         sequence: config.snapshotShortcut
         onActivated: player.snapshot()
     }
-
     ColumnLayout {
         id: toolbar
         anchors {
@@ -130,133 +129,24 @@ Rectangle {
             Layout.fillWidth: true
             currentIndex: urlInput.currentIndex
             ColumnLayout{
-                id: photoWidget
-                Layout.fillWidth: true
-                Button {
-                    Layout.fillWidth: true
-                    text: "Shot"
-                    onClicked: player.snapshot()
-                    onPressed: cameraControl.send_cmd(CameraControl.CMD_SHOT)
-                    onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    onHoveredChanged: {
-                        if(hovered)
-                            cameraControl.send_cmd(CameraControl.CMD_SHOT_ENT)
-                    }
-                }
-                GridLayout {
-                    Layout.fillWidth: true
-                    rows: 5
-                    columns: 5
-                    RoundButton {
-                        text: "Play"
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_PLAY)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        radius: width / 2
-                        Layout.row: 0
-                        Layout.column: 0
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
-                    Button {
-                        text: "Up"
-                        Layout.row: 1
-                        Layout.column: 1
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_UP)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Left"
-                        Layout.row: 2
-                        Layout.column: 0
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_LEFT)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Ok"
-                        Layout.row: 2
-                        Layout.column: 1
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_OK)
-                        onReleased:cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Right"
-                        Layout.row: 2
-                        Layout.column: 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_RIGHT)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Down"
-                        Layout.row: 3
-                        Layout.column: 1
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_DOWN)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    RoundButton {
-                        text: "On"
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ON)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        radius: width / 2
-                        Layout.row: 4
-                        Layout.column: 0
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
-                    RoundButton {
-                        text: "Menu"
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_MENU)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        radius: width / 2
-                        Layout.row: 4
-                        Layout.column: 2
-                        Layout.minimumHeight: width
-                        Layout.fillWidth: true
-                    }
+                PhotoButtons{
+                    id: photobuttons
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button {
-                        text: "<---"
-                        Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
-                    }
-                    Button {
-                        text: "--->"
-                        Layout.preferredWidth: toolbar.width / 2
-                        onPressed:cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
-                    }
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "ZOOM-"
-                        Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
-                        onReleased:cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        }
-
                     Button {
                         text: "ZOOM+"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed:  cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
+                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+                    }
+                    Button {
+                        text: "ZOOM-"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
                         onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
                     }
                 }
-            }
-            ColumnLayout{
-                id:tcamera
-                Button {
-                    Layout.fillWidth: true
-                    text: "Record"
-                    checkable: true
-                    onClicked: player.enableRecord(checked)
-                }
-                Button {
-                    Layout.fillWidth: true
-                    text: "Snapshot"
-                    onClicked: player.snapshot()
-                }
-
             }
             ColumnLayout {
                 id: videoWidget
@@ -288,9 +178,27 @@ Rectangle {
                     }
                 }
             }
+            ColumnLayout{
+                PhotoButtons{
+                    id: photobuttons_new
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Button {
+                        text: "<---"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
+                    }
+                    Button {
+                        text: "--->"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+                    }
+                }
+            }
+
         }
     }
-
     Button {
         anchors {
             right: parent.right
@@ -325,7 +233,6 @@ Rectangle {
         Component.onCompleted: play()
         osdMenu: osdMenu
     }
-
     VideoOutput {
         source: player
         anchors {
@@ -402,4 +309,3 @@ Rectangle {
         }
     }
 }
-

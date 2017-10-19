@@ -71,5 +71,5 @@ HEADERS  += \
 
 DISTFILES += \
     qmlvideo_lite.qml \
-    qmlvideo_full.qml
+    qmlvideo_full.qml \
     PhotoButtons.qml

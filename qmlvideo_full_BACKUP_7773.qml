@@ -130,100 +130,128 @@ Rectangle {
             Layout.fillWidth: true
             currentIndex: urlInput.currentIndex
             ColumnLayout{
-                id: photoWidget
-                Layout.fillWidth: true
-                Button {
+<<<<<<< HEAD
+                ColumnLayout {
+                    id: photoWidget
                     Layout.fillWidth: true
-                    text: "Shot"
-                    onClicked: player.snapshot()
-                    onPressed: cameraControl.send_cmd(CameraControl.CMD_SHOT)
-                    onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    onHoveredChanged: {
-                        if(hovered)
-                            cameraControl.send_cmd(CameraControl.CMD_SHOT_ENT)
-                    }
-                }
-                GridLayout {
-                    Layout.fillWidth: true
-                    rows: 5
-                    columns: 5
-                    RoundButton {
-                        text: "Play"
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_PLAY)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        radius: width / 2
-                        Layout.row: 0
-                        Layout.column: 0
-                        Layout.minimumHeight: width
+                    Button {
                         Layout.fillWidth: true
+                        text: "Record"
+                        checkable: true
+                        onClicked: player.enableRecord(checked)
                     }
                     Button {
-                        text: "Up"
-                        Layout.row: 1
-                        Layout.column: 1
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_UP)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Left"
-                        Layout.row: 2
-                        Layout.column: 0
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_LEFT)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Ok"
-                        Layout.row: 2
-                        Layout.column: 1
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_OK)
-                        onReleased:cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Right"
-                        Layout.row: 2
-                        Layout.column: 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_RIGHT)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    Button {
-                        text: "Down"
-                        Layout.row: 3
-                        Layout.column: 1
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_DOWN)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                    }
-                    RoundButton {
-                        text: "On"
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ON)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        radius: width / 2
-                        Layout.row: 4
-                        Layout.column: 0
-                        Layout.minimumHeight: width
+                        id:but
                         Layout.fillWidth: true
+                        text: "Shot"
+                        onClicked: player.snapshot()
+                        onPressed: cameraControl.send_cmd(cmd_shot)
+                        onReleased: cameraControl.send_cmd(cmd_off)
+                        onHoveredChanged: if(btn_area){
+                                              btn_area=false;
+                                          }else
+                                          {  btn_area=true;
+                                              cameraControl.send_cmd(cmd_shot_ent)
+                                          }
                     }
-                    RoundButton {
-                        text: "Menu"
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_MENU)
-                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
-                        radius: width / 2
-                        Layout.row: 4
-                        Layout.column: 2
-                        Layout.minimumHeight: width
+                    GridLayout {
                         Layout.fillWidth: true
+                        rows: 5
+                        columns: 5
+                        RoundButton {
+                            text: "Play"
+                            onPressed:cameraControl.send_cmd(cmd_play)
+                            onReleased:cameraControl.send_cmd(cmd_off)
+                            radius: width / 2
+                            Layout.row: 0
+                            Layout.column: 0
+                            Layout.minimumHeight: width
+                            Layout.fillWidth: true
+                        }
+                        Button {
+                            text: "Up"
+                            Layout.row: 1
+                            Layout.column: 1
+                            onPressed: cameraControl.send_cmd(cmd_up)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Left"
+                            Layout.row: 2
+                            Layout.column: 0
+                            onPressed: cameraControl.send_cmd(cmd_left)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Ok"
+                            Layout.row: 2
+                            Layout.column: 1
+                            onPressed: cameraControl.send_cmd(cmd_ok)
+                            onReleased:cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Right"
+                            Layout.row: 2
+                            Layout.column: 2
+                            onPressed: cameraControl.send_cmd(cmd_right)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        Button {
+                            text: "Down"
+                            Layout.row: 3
+                            Layout.column: 1
+                            onPressed: cameraControl.send_cmd(cmd_down)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                        }
+                        RoundButton {
+                            text: "On"
+                            onPressed:cameraControl.send_cmd(cmd_on)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                            radius: width / 2
+                            Layout.row: 4
+                            Layout.column: 0
+                            Layout.minimumHeight: width
+                            Layout.fillWidth: true
+                        }
+                        RoundButton {
+                            text: "Menu"
+                            onPressed: cameraControl.send_cmd(cmd_menu)
+                            onReleased: cameraControl.send_cmd(cmd_off)
+                            radius: width / 2
+                            Layout.row: 4
+                            Layout.column: 2
+                            Layout.minimumHeight: width
+                            Layout.fillWidth: true
+                        }
                     }
+=======
+                PhotoButtons{
+                    id: photobuttons
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Button {
                         text: "<---"
                         Layout.preferredWidth: toolbar.width / 2
+<<<<<<< HEAD
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                              cameraControl.send_cmd(cmd_zoom_min)
+                        }
+=======
                         onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
+                        onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
                     }
                     Button {
                         text: "--->"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed:cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+<<<<<<< HEAD
+                        onPressed:{
+                            for(var i=0;i<4;i++)
+                                 cameraControl.send_cmd(cmd_zoom_plus)
+                        }
                     }
                 }
                 RowLayout {
@@ -231,15 +259,22 @@ Rectangle {
                     Button {
                         text: "ZOOM-"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
-                        onReleased:cameraControl.send_cmd(CameraControl.CMD_OFF)
+                        onPressed:{
+                            cameraControl.send_cmd(cmd_zoom_min)
                         }
-
+                                       onReleased: cameraControl.send_cmd(cmd_off)
+                    }
                     Button {
                         text: "ZOOM+"
                         Layout.preferredWidth: toolbar.width / 2
-                        onPressed:  cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+                        onPressed:{
+                            cameraControl.send_cmd(cmd_zoom_plus)
+                        }
+                        onReleased: cameraControl.send_cmd(cmd_off)
+=======
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
                         onReleased: cameraControl.send_cmd(CameraControl.CMD_OFF)
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
                     }
                 }
             }
@@ -288,9 +323,31 @@ Rectangle {
                     }
                 }
             }
+<<<<<<< HEAD
+
+=======
+            ColumnLayout{
+                PhotoButtons{
+                    id: photobuttons_new
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Button {
+                        text: "<---"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_OUT)
+                    }
+                    Button {
+                        text: "--->"
+                        Layout.preferredWidth: toolbar.width / 2
+                        onPressed: cameraControl.send_cmd(CameraControl.CMD_ZOOM_IN)
+                    }
+                }
+            }
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
+
         }
     }
-
     Button {
         anchors {
             right: parent.right
@@ -303,9 +360,12 @@ Rectangle {
 
     CameraControl{
         id: cameraControl
+<<<<<<< HEAD
+=======
         portId: 10
         behaviour: urlInput.currentIndex == 3 ?
                        CameraControl.BEHAVIOUR_NEW : CameraControl.BEHAVIOUR_OLD
+>>>>>>> b8d2664aa92e729328f3fa0849a9241dddabfbf8
     }
 
     VideoCoords {
