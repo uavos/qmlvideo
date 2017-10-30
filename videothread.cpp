@@ -26,8 +26,10 @@ void VideoThread::run()
     emit stateChanged(QAbstractSocket::ConnectingState);
 
     m_ioMutex.lock();
-    reader.open(m_inputUrl.toStdString());
+    std::string inputUrl = m_inputUrl.toStdString();
     m_ioMutex.unlock();
+
+    reader.open(inputUrl);
 
     if(!reader.isOpen())
     {
