@@ -33,7 +33,6 @@ FfmpegPlayer::FfmpegPlayer(QObject *parent):
 void FfmpegPlayer::play()
 {
     m_videoThread.stop();
-    m_videoThread.wait();
     if(!m_videoThread.wait(1000))
         m_videoThread.terminate();
     m_error = QMediaPlayer::NoError;
@@ -46,7 +45,6 @@ void FfmpegPlayer::play()
 void FfmpegPlayer::stop()
 {
     m_videoThread.stop();
-    m_videoThread.wait();
     if(!m_videoThread.wait(1000))
         m_videoThread.terminate();
     m_surface->stop();
